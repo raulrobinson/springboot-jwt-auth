@@ -53,7 +53,7 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     /**  
-     *  Clase encargada para el ingreso del usuario solicitando un Token.
+     *  Clase encargada para el ingreso del usuario solicitando un Token BEARER JWT.
      *  
      *  @Autor: Raul Bolivar
      *  @Date: 2020-12-22
@@ -89,6 +89,7 @@ public class AuthController {
      */
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
@@ -102,35 +103,37 @@ public class AuthController {
         }
 
         // Crear un nuevo usuario.
-        User user = new User(signUpRequest.getUsername(),
+        User user = new User(
+                signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
+                encoder.encode(
+                        signUpRequest.getPassword()
+                )
+        );
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role no encontrado."));
+                    .orElseThrow(() -> new RuntimeException("Error: ROLE no encontrado."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "admin":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role no encontrado."));
+                                .orElseThrow(() -> new RuntimeException("Error: ROLE no encontrado."));
                         roles.add(adminRole);
-
                         break;
                     case "mod":
                         Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role no encontrado."));
+                                .orElseThrow(() -> new RuntimeException("Error: ROLE no encontrado."));
                         roles.add(modRole);
-
                         break;
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role no encontrado."));
+                                .orElseThrow(() -> new RuntimeException("Error: ROLE no encontrado."));
                         roles.add(userRole);
                 }
             });
